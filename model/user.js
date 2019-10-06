@@ -21,14 +21,14 @@ const userSchema = new Schema({
   },
   gender: { // 性别，枚举
     type: String,
-    enum: ['male', 'fmale'], default: 'male', required: true
+    enum: ['male', 'fmale'], default: 'male', 
   },
   personal:{ // 个人简介
     type: String
   },
   state:{ // 用户状态
     type:String,
-    enum: ['0', '1'], default: '1', required: true
+    enum: ['0', '1'], default: '1', 
   },
   iid:{ // 身份id
     type: Schema.Types.ObjectId,
@@ -36,7 +36,7 @@ const userSchema = new Schema({
   },
   classx:{ //年级
    type:String,
-   enum: ['大一', '大二','大三'], default: '大一', required: true
+   enum: ['大一', '大二','大三'], default: '大一', 
   },
   __v:{
     select: false // 返回数据时不包括这一项

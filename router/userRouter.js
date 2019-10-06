@@ -1,10 +1,11 @@
 const Router = require('koa-router')
 const User = require('../model/user')
-const userRouter = new Router({prefix:'/users'})
+const mongoose = require('mongoose')
+const userRouter = new Router({ prefix: '/users' })
 // $route GET /api/users/test
 // @desc 返回json
 userRouter.get('/test', async (ctx) => {
-  ctx.body = {testf:'ok'}
+  ctx.body = { testf: 'ok' }
 })
 
 // $route POST /api/users/register
@@ -24,11 +25,11 @@ userRouter.post('/register', async (ctx) => {
 // $route GET /api/users/
 // @desc  获取用户列表 分页
 userRouter.get('/', async (ctx) => {
-  let pagesize = ctx.query.pagesize
-  let pagenumber = ctx.query.pagenumber
-  const count = await User.find()
-  const user = await User.find().skip(pagesize * (pagenumber - 1)).limit(pagesize*1)
-  ctx.body = { meta: { msg: "获取成功", count:count.length, status: 200 }, data: user }
+  let pagesize = ctx.query.pagesize || 10
+  let pagenumber = ctx.query.pagenumber || 1
+  const count = await User.count()
+  const user = await User.aggregate([{ $skip: pagesize * (pagenumber - 1) }, { $limit: pagesize * 1 }, { $lookup: { from: 'identity', localField: 'iid', foreignField: '_id', as: 'arr' } }])
+  ctx.body = { meta: { msg: "获取成功", status: 200 }, count, data: user }
 })
 
 // $route POST /api/users/login
@@ -39,16 +40,25 @@ userRouter.post('/login', async (ctx) => {
     ctx.body = { meta: { msg: "用户名或密码错误", status: 500 }, data: user }
     return;
   }
-  ctx.body = { meta: { msg: "登陆成功", status: 200 }, data:user }
+  ctx.body = { meta: { msg: "登陆成功", status: 200 }, data: user }
 })
 // $route GET /api/users/search
-// @desc  根据用户名搜索用户
+// @desc  高级搜索功能 分页,模糊查询，筛选
 userRouter.get('/search', async (ctx) => {
-  const user = await User.find()
-  let reuser = user.filter((item) => {
-    return -1 != item.username.indexOf(ctx.query.name)
-  })
-  ctx.body = { meta: { msg: "获取成功", status: 200 }, data: reuser }
+  let pagesize = ctx.query.pagesize || 10
+  let pagenumber = ctx.query.pagenumber || 1
+  if(ctx.query.iid==""){
+    
+    const user = await User.aggregate([{ $match: { username: { $regex: ctx.query.username, $options: 'i' }, classx: { $regex: ctx.query.classx, $options: 'i' }, gender: { $regex: ctx.query.gender, $options: 'i' }, state: { $regex: ctx.query.state, $options: 'i' } } }, { $skip: pagesize * (pagenumber - 1) }, { $limit: pagesize * 1 }, { $lookup: { from: 'identity', localField: 'iid', foreignField: '_id', as: 'arr' } }])
+    const count = await User.aggregate([{ $match: { username: { $regex: ctx.query.username, $options: 'i' }, classx: { $regex: ctx.query.classx, $options: 'i' }, gender: { $regex: ctx.query.gender, $options: 'i' }, state: { $regex: ctx.query.state, $options: 'i' } } }])
+    console.log(count.length)
+    ctx.body = { meta: { msg: "获取成功", status: 200 }, count:count.length, data: user }
+  }else{
+    const count = await User.aggregate([{ $match: { username: { $regex: ctx.query.username, $options: 'i' }, classx: { $regex: ctx.query.classx, $options: 'i' }, gender: { $regex: ctx.query.gender, $options: 'i' }, state: { $regex: ctx.query.state, $options: 'i' },iid: mongoose.Types.ObjectId(ctx.query.iid)  } }])
+    const user = await User.aggregate([{ $match: { username: { $regex: ctx.query.username, $options: 'i' }, classx: { $regex: ctx.query.classx, $options: 'i' }, gender: { $regex: ctx.query.gender, $options: 'i' }, state: { $regex: ctx.query.state, $options: 'i' },iid:  mongoose.Types.ObjectId(ctx.query.iid) } }, { $skip: pagesize * (pagenumber - 1) }, { $limit: pagesize * 1 }, { $lookup: { from: 'identity', localField: 'iid', foreignField: '_id', as: 'arr' } }])
+    
+    ctx.body = { meta: { msg: "获取成功", status: 200 }, count:count.length, data: user }
+  }
 })
 // $route GET /api/users/:id
 // @desc  获取指定用户用户
@@ -74,7 +84,7 @@ userRouter.put('/:id', async (ctx) => {
 // $route PUT /api/users/:id/identity/:iid
 // @desc  分配用户身份
 userRouter.put('/:id/identity/:iid', async (ctx) => {
-  const user = await User.findByIdAndUpdate(ctx.params.id,{iid:ctx.params.iid} )
+  const user = await User.findByIdAndUpdate(ctx.params.id, { iid: ctx.params.iid })
   if (!user) {
     ctx.body = { meta: { msg: "用户不存在", status: 404 }, data: user }
     return;

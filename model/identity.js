@@ -12,8 +12,11 @@ const identitySchema = new Schema({
   aid://  权限
     { 
       type:Array
-    }
-  ,
+    },
+    date:{ // 创建时间
+      type:Number,
+      default: Date.now
+     },  
   __v:{
     select: false // 返回数据时不包括这一项
   }

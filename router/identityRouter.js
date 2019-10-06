@@ -49,64 +49,69 @@ identityRouter.delete('/auth', async (ctx) => {
   ctx.body = { meta: { msg: "删除成功", status: 200 }, data: user }
 })
 // $route PUT /api/identity/right/:aid
-// @desc 身份授权
+// @desc 角色授权 重复了
 identityRouter.put('/right/:aid', async (ctx) => {
   
   const user = await  Identity.findByIdAndUpdate(ctx.params.aid, {aid:ctx.request.body})
   if (!user) {
-    ctx.body = { meta: { msg: "身份不存在", status: 404 }, data: user }
+    ctx.body = { meta: { msg: "角色不存在", status: 404 }, data: user }
     return;
   }
   ctx.body = { meta: { msg: "编辑成功", status: 200 }, data: user }
 })
 
-
-
 // $route POST /api/identity/add
-// @desc 添加身份
+// @desc 添加角色
 identityRouter.post('/add', async (ctx) => {
   const { identity } = ctx.request.body
   const reuser = await Identity.findOne({ identity: identity })
   if (reuser) {
-    ctx.body = { meta: { msg: "身份重复", status: 409 }, data: reuser }
+    ctx.body = { meta: { msg: "角色重复", status: 409 }, data: reuser }
     return;
   }
   const user = await new Identity(ctx.request.body).save()
   ctx.body = { meta: { msg: "添加成功", status: 200 }, data: user }
 })
 // $route GET /api/identity
-// @desc 获取身份列表
+// @desc 获取角色列表
 identityRouter.get('/', async (ctx) => {
    const user = await Identity.find()
   ctx.body = { meta: { msg: "添加成功", status: 200 }, data: user }
 })
-
+// $route GET /api/identity/search
+// @desc  通过关键字搜索角色
+identityRouter.get('/:id', async (ctx) => {
+  const user = await Identity.aggregate([{ $match: { identity: { $regex: ctx.query.name, $options: 'i' }, }}])
+  
+  ctx.body = { meta: { msg: "获取成功", status: 200 }, data: user }
+})
+  
 // $route GET /api/identity/:id
-// @desc  获取指定身份
+// @desc  获取指定角色
 identityRouter.get('/:id', async (ctx) => {
   const user = await Identity.findById(ctx.params.id)
   if (!user) {
-    ctx.body = { meta: { msg: "身份不存在", status: 404 }, data: user }
+    ctx.body = { meta: { msg: "角色不存在", status: 404 }, data: user }
     return;
   }
   ctx.body = { meta: { msg: "获取成功", status: 200 }, data: user }
 })
 // $route PUT /api/identity/:id
-// @desc  编辑身份
+// @desc  编辑角色
 identityRouter.put('/:id', async (ctx) => {
   const user = await  Identity.findByIdAndUpdate(ctx.params.id, ctx.request.body)
   if (!user) {
-    ctx.body = { meta: { msg: "身份不存在", status: 404 }, data: user }
+    ctx.body = { meta: { msg: "角色不存在", status: 404 }, data: user }
     return;
   }
   ctx.body = { meta: { msg: "编辑成功", status: 200 }, data: user }
 })
 // $route DElETE /api/identity/:id
-// @desc  删除身份
+// @desc  删除角色
 identityRouter.delete('/:id', async (ctx) => {
   const user = await Identity.findByIdAndRemove(ctx.params.id)
   if (!user) {
-    ctx.body = { meta: { msg: "身份不存在", status: 404 }, data: user }
+    ctx.body = { meta: { msg: "角色不存在", status: 404 }, data: user }
     return;
   }
   ctx.body = { meta: { msg: "删除成功", status: 204 }, data: user }
