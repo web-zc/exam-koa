@@ -1,4 +1,5 @@
 const Router = require('koa-router')
+const mongoose = require('mongoose')
 const Titletype = require('../model/titletype')
 const Title = require('../model/title')
 const titleRouter = new Router({prefix:'/title'})
@@ -26,9 +27,33 @@ titleRouter.post('/', async (ctx) => {
 titleRouter.get('/', async (ctx) => {
   let pagesize = ctx.query.pagesize ||10
   let pagenumber = ctx.query.pagenumber||1
-  const count = await Title.find()
-  const user = await Title.find().skip(pagesize * (pagenumber - 1)).limit(pagesize*1)
-  ctx.body = { meta: { msg: "获取成功", count:count.length, status: 200 }, data: user }
+  const count = await Title.count()
+  const user = await Title.aggregate([{ $skip: pagesize * (pagenumber - 1) }, { $limit: pagesize * 1 }, { $lookup: { from: 'titletype', localField: 'tyid', foreignField: '_id', as: 'items' } }])
+  ctx.body = { meta: { msg: "获取成功",  status: 200 },count, data: user }
+})
+// $route GET /api/title/
+// @desc 获取题目列表x 随机题目用
+titleRouter.get('/sum', async (ctx) => {
+  const user = await Title.find()
+  ctx.body = { meta: { msg: "获取成功",  status: 200 }, data: user }
+})
+// $route GET /api/title/search
+// @desc 获取题目列表 高级功能 分页 过滤
+titleRouter.get('/search', async (ctx) => {
+  let pagesize = ctx.query.pagesize || 10
+  let pagenumber = ctx.query.pagenumber || 1
+  if(ctx.query.tyid==""){
+    const user = await Title.aggregate([{ $match: { title: { $regex: ctx.query.title, $options: 'i' },difficulty: { $regex: ctx.query.difficulty, $options: 'i' } } }, { $skip: pagesize * (pagenumber - 1) }, { $limit: pagesize * 1 },{ $lookup: { from: 'titletype', localField: 'tyid', foreignField: '_id', as: 'items' } }])
+    ctx.body = { meta: { msg: "获取成功", status: 200 },  data: user }
+    const count = await Title.aggregate([{ $match: { title: { $regex: ctx.query.title, $options: 'i' },difficulty: { $regex: ctx.query.difficulty, $options: 'i' } } }])
+    ctx.body = { meta: { msg: "获取成功", status: 200 }, count:count.length, data: user }
+  }else{
+    const user = await Title.aggregate([{ $match: { title: { $regex: ctx.query.title, $options: 'i' },difficulty: { $regex: ctx.query.difficulty, $options: 'i' },tyid: mongoose.Types.ObjectId(ctx.query.tyid) } }, { $skip: pagesize * (pagenumber - 1) }, { $limit: pagesize * 1 },{ $lookup: { from: 'titletype', localField: 'tyid', foreignField: '_id', as: 'items' } }])
+    ctx.body = { meta: { msg: "获取成功", status: 200 },  data: user }
+    const count = await Title.aggregate([{ $match: { title: { $regex: ctx.query.title, $options: 'i' },difficulty: { $regex: ctx.query.difficulty, $options: 'i' },tyid: mongoose.Types.ObjectId(ctx.query.tyid) } }])
+    ctx.body = { meta: { msg: "获取成功", status: 200 }, count:count.length, data: user }
+  }
+  
 })
 
 
@@ -43,7 +68,7 @@ titleRouter.delete('/:id', async (ctx) => {
   ctx.body = { meta: { msg: "删除成功", status: 204 }, data: user }
 })
 // $route PUT /api/title/:id
-// @desc  编辑用户
+// @desc  编辑题目
 titleRouter.put('/:id', async (ctx) => {
   const user = await Title.findByIdAndUpdate(ctx.params.id, ctx.request.body)
   if (!user) {

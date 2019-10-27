@@ -32,12 +32,15 @@ const titleSchema = new Schema({
     default:'3'
   },
   difficulty:{ //难度
-    type:String,
-    enum: ['1', '2','3','4','5'], default: '3', required: true
+    type:Number, default: 3, required: true
    },
    tyid:{ // 题目类别id
     type: Schema.Types.ObjectId,
     required:true,
+   },
+   date:{ // 创建时间
+    type:Number,
+    default: Date.now
    },
   __v:{
     select: false // 返回数据时不包括这一项

@@ -51,7 +51,6 @@ userRouter.get('/search', async (ctx) => {
     
     const user = await User.aggregate([{ $match: { username: { $regex: ctx.query.username, $options: 'i' }, classx: { $regex: ctx.query.classx, $options: 'i' }, gender: { $regex: ctx.query.gender, $options: 'i' }, state: { $regex: ctx.query.state, $options: 'i' } } }, { $skip: pagesize * (pagenumber - 1) }, { $limit: pagesize * 1 }, { $lookup: { from: 'identity', localField: 'iid', foreignField: '_id', as: 'arr' } }])
     const count = await User.aggregate([{ $match: { username: { $regex: ctx.query.username, $options: 'i' }, classx: { $regex: ctx.query.classx, $options: 'i' }, gender: { $regex: ctx.query.gender, $options: 'i' }, state: { $regex: ctx.query.state, $options: 'i' } } }])
-    console.log(count.length)
     ctx.body = { meta: { msg: "获取成功", status: 200 }, count:count.length, data: user }
   }else{
     const count = await User.aggregate([{ $match: { username: { $regex: ctx.query.username, $options: 'i' }, classx: { $regex: ctx.query.classx, $options: 'i' }, gender: { $regex: ctx.query.gender, $options: 'i' }, state: { $regex: ctx.query.state, $options: 'i' },iid: mongoose.Types.ObjectId(ctx.query.iid)  } }])

@@ -17,9 +17,13 @@ const paperSchema = new Schema({
     type:String,
     enum: ['0', '1'], default: '0', required: true
    },
-   tilte:{
+   title:{
       type:Array,
       required:true
+   },
+   date:{ // 创建时间
+    type:Number,
+    default: Date.now
    },
   __v:{
     select: false // 返回数据时不包括这一项

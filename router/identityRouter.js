@@ -28,25 +28,48 @@ identityRouter.delete('/subauth', async (ctx) => {
   const user = await  Subauth.deleteMany()
   ctx.body = { meta: { msg: "删除成功", status: 200 }, data: user }
 })
+// $route DELETE /api/identity/subauth/:id
+// @desc 删除子权限
+identityRouter.delete('/subauth/:id', async (ctx) => {
+  const user = await  Subauth.findByIdAndDelete(ctx.params.id)
+  ctx.body = { meta: { msg: "删除成功", status: 200 }, data: user }
+})
+// $route PUT /api/identity/subauth/:id
+// @desc 编辑子权限
+identityRouter.put('/subauth/:id', async (ctx) => {
+  const user = await  Subauth.findByIdAndUpdate(ctx.params.id,ctx.request.body)
+  ctx.body = { meta: { msg: "编辑成功", status: 200 }, data: user }
+})
 // $route POST /api/identity/auth/add
 // @desc 添加权限
 identityRouter.post('/auth/add', async (ctx) => {
   const user = await new Auth(ctx.request.body).save()
   ctx.body = { meta: { msg: "添加成功", status: 200 }, data: user }
 })
-
+// $route PUT /api/identity/auth/:id
+// @desc 编辑权限
+identityRouter.put('/auth/:id', async (ctx) => {
+  const user = await Auth.findByIdAndUpdate(ctx.params.id,ctx.request.body)
+  ctx.body = { meta: { msg: "添加成功", status: 200 }, data: user }
+})
 // $route GET /api/identity/auth
 // @desc 获取权限
 identityRouter.get('/auth', async (ctx) => {
   const user = await  Auth
-  .aggregate([{ $lookup: { from: 'subauth', localField: 'saids', foreignField: '_id', as: 'itmes' } }])
+  .aggregate([{ $lookup: { from: 'subauth', localField: '_id', foreignField: 'faids', as: 'itmes' } }])
   ctx.body = { meta: { msg: "获取成功", status: 200 }, data: user }
 })
 // $route DELETE /api/identity/auth
 // @desc 删除所有权限
 identityRouter.delete('/auth', async (ctx) => {
   const user = await  Auth.deleteMany()
-  ctx.body = { meta: { msg: "删除成功", status: 200 }, data: user }
+  ctx.body = { meta: { msg: "删除成功", status: 204 }, data: user }
+})
+// $route DELETE /api/identity/auth/:id
+// @desc 删除权限
+identityRouter.delete('/auth/:id', async (ctx) => {
+  const user = await  Auth.findByIdAndDelete(ctx.params.id)
+  ctx.body = { meta: { msg: "删除成功", status: 204 }, data: user }
 })
 // $route PUT /api/identity/right/:aid
 // @desc 角色授权 重复了

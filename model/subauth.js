@@ -13,6 +13,14 @@ const subauthSchema = new Schema({
     type:String,
     required:true
   },
+  faids:// 父权限(auth)id
+    {
+      type: Schema.Types.ObjectId
+    },
+  date:{ // 创建时间
+    type:Number,
+    default: Date.now
+   },
   __v:{
     select: false // 返回数据时不包括这一项
   }
