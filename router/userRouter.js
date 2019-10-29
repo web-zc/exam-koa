@@ -52,18 +52,22 @@ userRouter.post('/upload/:id', async (ctx) => {
   const file = ctx.request.files.file
   // 拿到文件名包括扩展名
   const basename = path.basename(file.path)
+  console.log('1111111111'+basename)
   const userx = await User.findById(ctx.params.id)
   if (userx.avatar != '') {
-    var filePath = userx.avatar.substr(ctx.origin.length)
-    fs.unlink('../public' + filePath, (err) => {
+    var filePath = userx.avatar.replace(`${ctx.origin}`,'')
+    console.log(filePath+'2222222222222')
+    fs.unlink('./public' + filePath, (err) => {
       if (err) {
-        console.log(err)
+        // console.log(err)
+        console.log('错了')
         return;
       }
     })
   }
+  console.log('33333333'+ctx.origin) // 域名
   const user = await User.findByIdAndUpdate(ctx.params.id, { avatar: `${ctx.origin}/uploads/${basename}` })
-  ctx.body = { meta: { msg: "上传成功", status: 200 }, data: user }
+  ctx.body = { meta: { msg: "上传成功", status: 200 }, data: { avatar: `${ctx.origin}/uploads/${basename}` } }
 })
 // $route GET /api/users/
 // @desc  获取用户列表 分页
