@@ -33,7 +33,7 @@ const userSchema = new Schema({
   },
   iid:{ // 身份id
     type: Schema.Types.ObjectId,
-    default:'5d94b9ad24139d0fb00fb500',// 默认学生角色
+    default: '5d94b9ad24139d0fb00fb500',// 默认学生角色
   },
   classx:{ //年级
    type:String,

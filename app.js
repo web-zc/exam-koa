@@ -9,7 +9,7 @@ const koaBody = require('koa-body')
 
 // 链接数据库
 const mongoose = require('mongoose')
-mongoose.connect('mongodb://139.196.72',{useNewUrlParser: true,useCreateIndex: true})
+mongoose.connect('mongodb://139.196.72.164/exam',{useNewUrlParser: true,useCreateIndex: true})
 .then(()=>{
   console.log('mongodb start')
 })
