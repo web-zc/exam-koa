@@ -18,6 +18,7 @@ const userSchema = new Schema({
   },
   avatar: { //头像
     type: String,
+    default:'',
   },
   gender: { // 性别，枚举
     type: String,

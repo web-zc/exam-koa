@@ -1,5 +1,5 @@
 const Router = require('koa-router')
-const userRouter = require('./userRouter')
+const {userRouter} = require('./userRouter')
 const identityRouter = require('./identityRouter')
 const titleRouter = require('./titleRouter')
 const paperRouter = require('./paperRouter')
